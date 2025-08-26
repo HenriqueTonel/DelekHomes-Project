@@ -21,6 +21,6 @@ The files inside this repository contain my work in automated tests from this pr
 ### Contact me
 If you liked this project, feel free to share 🚀
 
-💠 My linkedIn profile: [https://www.linkedin.com/in/henrique-kitzmann-tonel/](https://www.linkedin.com/in/henrique-kitzmann-tonel/)
+💠 My LinkedIn profile: [https://www.linkedin.com/in/henrique-kitzmann-tonel/](https://www.linkedin.com/in/henrique-kitzmann-tonel/)
 
 💠 My email: henriquekitzmanntonel@gmail.com
