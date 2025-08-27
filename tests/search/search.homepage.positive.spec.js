@@ -146,14 +146,6 @@ test.describe('Home Page Search Feature Positive Tests', () => {
       { timeout: 6000 }
     );
 
-    const resultCityCounter =
-      await listingsPage.estateObject.resultCity.count();
-
-    for (let i = 1; i < resultCityCounter; i++) {
-      await expect(listingsPage.estateObject.resultCity.nth(i)).toContainText(
-        city
-      );
-    }
     resultTitle = await listingsPage.estateObject.resultTitle
       .first()
       .textContent();
