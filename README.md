@@ -9,6 +9,12 @@ I’ve worked extensively on testing applications for web and mobile platforms, 
 
 I thrive in collaborative environments, working with both onshore and offshore teams, and I bring a proactive mindset to problem-solving, quality improvement, and continuous learning. Tools like JIRA, Zephyr, and Qase.io are part of my daily workflow, helping me maintain high standards even in fast-paced release cycles.
 
+### About Delek Homes
+
+Delek Homes is a company that builds and sells real estate in Florida. The website is dedicated for users to look for property listings that fit their current needs, while certified realtors can publish these real estates.
+
+Delek Homes' mission is to solve the problem of frustation that may arise from non-intuitive search processes by simplifying and streamlining the property searching process. Finding the right home should be a straightforward and enjoyable experience, not a daunting task.
+
 ### Automated Testing
 The files inside this repository contain my work in automated tests from this project. If you have interest in running the tests in your local machine, feel free to send me DM through my socials under "Contact Me" section, to have access to the data in "Secrets"!
 
