@@ -19,16 +19,4 @@ export const test = base.extend({
     await use(page);
     await context.close();
   },
-
-  createdListing: async ({}, use, testInfo) => {
-    const apiClient = await request.newContext();
-    const adminToken = await apiGetLoginToken(
-      apiClient,
-      testInfo.project.use.env.adminEmail,
-      testInfo.project.use.env.adminPassword
-    );
-    const listing = await apiCreateListing(apiClient, adminToken);
-    await use(listing);
-    await apiClient.dispose();
-  },
 });

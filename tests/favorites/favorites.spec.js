@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../page_objects/LoginPage.js';
+import { test } from '../../fixtures/fixtures.js';
+import { expect } from '@playwright/test';
 import { ListingsPage } from '../../page_objects/ListingsPage.js';
 import { faker } from '@faker-js/faker';
-import apiCreateListing from '../../api/ListingsApi.js';
+import { apiCreateListing } from '../../api/ListingsApi.js';
 import {
   apiGetLoginToken,
   apiRegisterNewUserAndReturnJson,
@@ -10,12 +10,7 @@ import {
 } from '../../api/UsersApi.js';
 
 test.describe('Favorite objects tests', () => {
-  let loginPage,
-    listingsPage,
-    registerResponse,
-    adminToken,
-    apiToken,
-    listingResponse;
+  let listingsPage, registerResponse, adminToken, apiToken, listingResponse;
 
   test.beforeAll(async ({ request }, testInfo) => {
     const adminEmail = testInfo.project.use.env.adminEmail;
@@ -41,23 +36,19 @@ test.describe('Favorite objects tests', () => {
     listingResponse = await apiCreateListing(request, apiToken);
   });
 
-  test.beforeEach(async ({ page }, testInfo) => {
-    loginPage = new LoginPage(page);
-    listingsPage = new ListingsPage(page);
+  test.beforeEach(async ({ adminAuthenticatedPage }) => {
+    listingsPage = new ListingsPage(adminAuthenticatedPage);
 
-    await page.goto(`${testInfo.project.use.env.baseUrl}/auth/login`);
-    await loginPage.fillLoginFields(
-      testInfo.project.use.env.adminEmail,
-      testInfo.project.use.env.adminPassword
-    );
-    await loginPage.loginButton.click();
-    await page.waitForURL('/dashboard/user/profile');
+    await adminAuthenticatedPage.goto('');
+    await adminAuthenticatedPage.waitForURL('/');
   });
 
-  test('User should be able to add object to favorites', async ({ page }, testInfo) => {
+  test('User should be able to add object to favorites', async ({
+    adminAuthenticatedPage,
+  }) => {
     const objectTitle = await listingResponse.title;
 
-    await page.goto(`${testInfo.project.use.env.baseUrl}/featured-listings`);
+    await adminAuthenticatedPage.goto('/featured-listings');
 
     const objectFrame = await listingsPage.estateObject.resultFrame.filter({
       hasText: objectTitle,

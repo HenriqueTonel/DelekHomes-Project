@@ -3,27 +3,27 @@ import fs from 'fs';
 import path from 'path';
 
 /**
- * Will create a new listing through API 
+ * Will create a new listing through API
  * Default parameters create listing with valid random data
- * @param {*} apiClient 
+ * @param {*} apiClient
  * @param {*} token - Access token to account under which the listing will be created. Must have authorization Realtor or Admin to perform creation successfully
  * @param {URL} images - Desired image to use
- * @param {number} lotSize 
- * @param {number} sqft 
- * @param {number} garage 
- * @param {number} bathrooms 
- * @param {number} bedrooms 
- * @param {number} price 
- * @param {number} zipCode 
- * @param {string} state 
- * @param {string} city 
- * @param {string} address 
- * @param {string} description 
- * @param {string} title 
+ * @param {number} lotSize
+ * @param {number} sqft
+ * @param {number} garage
+ * @param {number} bathrooms
+ * @param {number} bedrooms
+ * @param {number} price
+ * @param {number} zipCode
+ * @param {string} state
+ * @param {string} city
+ * @param {string} address
+ * @param {string} description
+ * @param {string} title
  * @param {boolean} isPublished - Determines if listing will be published publically
  * @returns JSON file related to the newly created listing
  */
-export default async function apiCreateListing(
+async function apiCreateListing(
   apiClient,
   token,
   images = fs.createReadStream(
@@ -62,12 +62,11 @@ export default async function apiCreateListing(
     title: title,
     isPublished: isPublished,
   };
-  const apiCreateListingResponse = await apiClient.post(
-    '/api/estate-objects',
-    {
-      multipart: data,
-      Authorization: `Bearer ${token}`,
-    }
-  );
+  const apiCreateListingResponse = await apiClient.post('/api/estate-objects', {
+    multipart: data,
+    Authorization: `Bearer ${token}`,
+  });
   return await apiCreateListingResponse.json();
 }
+
+export { apiCreateListing };

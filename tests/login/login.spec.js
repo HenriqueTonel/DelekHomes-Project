@@ -2,31 +2,52 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../page_objects/LoginPage.js';
 import { HomePage } from '../../page_objects/HomePage.js';
 import { DashboardPage } from '../../page_objects/DashboardPage.js';
-import { apiLogin, apiRegisterNewUserAndReturnJson } from '../../api/UsersApi.js';
+import {
+  apiGetLoginToken,
+  apiLogin,
+  apiRegisterNewUserAndReturnJson,
+} from '../../api/UsersApi.js';
+import { faker } from '@faker-js/faker';
 
 test.describe('Login', () => {
   let loginPage, homePage, dashboardPage;
-  let newUserEmail, newUserPassword, newUserName, newUserSurname;
+  let newUserEmail,
+    newUserPassword,
+    newUserName,
+    newUserSurname,
+    newUserResponseBody;
 
-  //beforeAll -> criar usuário
-  //afterAll -> excluir usuário
-  test.beforeAll(async (request, testInfo) => {
-    const newUserResponse = await apiRegisterNewUserAndReturnJson(request, newUserEmail, false, newUserPassword,newUserSurname, newUserName);
-    const newUserResponseBody = await newUserResponse.json();
-    newUserEmail = newUserResponseBody.user.email;
-    newUserPassword 
-  });
-
-  test.beforeEach(async ({ page }, testInfo) => {
+  test.beforeEach(async ({ page, request }, testInfo) => {
     await page.goto(testInfo.project.use.env.baseUrl);
     loginPage = new LoginPage(page);
     homePage = new HomePage(page);
     dashboardPage = new DashboardPage(page);
+
+    if (
+      !testInfo.title.includes('Should login with an existing Admin account')
+    ) {
+      newUserEmail = faker.internet.email({
+        firstName: faker.person.firstName(),
+        provider: 'test.com',
+        allowSpecialCharacters: true,
+      });
+      newUserPassword = faker.internet.password();
+      newUserName = faker.person.firstName();
+      newUserSurname = 'Test';
+
+      newUserResponseBody = await apiRegisterNewUserAndReturnJson(
+        request,
+        newUserEmail,
+        false,
+        newUserPassword,
+        newUserSurname,
+        newUserName
+      );
+    }
   });
 
   test('Should login with an existing Admin account', async ({
     page,
-    request,
   }, testInfo) => {
     const adminEmail = testInfo.project.use.env.adminEmail;
     const adminPassword = testInfo.project.use.env.adminPassword;
@@ -34,30 +55,67 @@ test.describe('Login', () => {
 
     await homePage.loginButton.click();
 
-    expect(page).toHaveURL('/auth/login', { timeout: 6000 });
+    await expect(page).toHaveURL('/auth/login', { timeout: 6000 });
 
     await loginPage.fillLoginFields(adminEmail, adminPassword);
     await loginPage.loginButton.click();
 
     const adminLoginResponse = await page.waitForResponse('/api/users/login');
     const adminLoginResponseBody = await adminLoginResponse.json();
-    const adminName = `${adminLoginResponseBody.user.username} ${adminLoginResponseBody.user.user_surname}`;
+    const adminFullName = `${adminLoginResponseBody.user.username} ${adminLoginResponseBody.user.user_surname}`;
 
-    expect(page).toHaveURL('/dashboard/user/profile', { timeout: 6000 });
-    expect(dashboardPage.fullUserNameText).toHaveText(adminName);
-    expect(dashboardPage.userRoleText).toHaveText(displayRole);
+    await expect(page).toHaveURL('/dashboard/user/profile', { timeout: 6000 });
+    await expect(dashboardPage.fullUserNameText).toHaveText(adminFullName);
+    await expect(dashboardPage.userRoleText).toHaveText(displayRole);
   });
 
-  //Should login as user -> criar novo usuário no beforeAll
+  test('Should login with an existing User account', async ({ page }) => {
+    const displayRole = 'role: user';
 
+    await homePage.loginButton.click();
 
+    await expect(page).toHaveURL('/auth/login', { timeout: 6000 });
+
+    await loginPage.fillLoginFields(newUserEmail, newUserPassword);
+    await loginPage.loginButton.click();
+
+    const userFullName = `${newUserName} ${newUserSurname}`;
+
+    await expect(page).toHaveURL('/dashboard/user/profile', { timeout: 6000 });
+    await expect(dashboardPage.fullUserNameText).toHaveText(userFullName);
+    await expect(dashboardPage.userRoleText).toHaveText(displayRole);
+  });
   test('Should log out', async ({ page, request }, testInfo) => {
-    const adminEmail = testInfo.project.use.env.adminEmail;
-    const adminPassword = testInfo.project.use.env.adminEmail;
+    await apiLogin(page, request, newUserEmail, newUserPassword);
 
-    await apiLogin(page, request, adminEmail, adminPassword);
     await page.goto(testInfo.project.use.env.baseUrl);
 
-    await 
+    await expect(homePage.dashboardButton).toBeVisible();
+
+    await homePage.dashboardButton.click();
+
+    await expect(page).toHaveURL('/dashboard/user/profile');
+
+    await dashboardPage.userMenu.click();
+    await dashboardPage.userMenuLogoutItem.click();
+
+    await expect(page).toHaveURL('/auth/login');
+  });
+
+  test.afterEach('Teardown', async ({ request }, testInfo) => {
+    if (newUserResponseBody) {
+      const newUserId = newUserResponseBody.user.id;
+      const adminToken = await apiGetLoginToken(
+        request,
+        testInfo.project.use.env.adminEmail,
+        testInfo.project.use.env.adminPassword
+      );
+      await request.delete(`/api/users/${newUserId}`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      });
+    }
+    newUserResponseBody = undefined;
   });
 });

@@ -1,12 +1,13 @@
-import { test } from '../../fixtures/fixtures.js';
-import { expect } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { HomePage } from '../../page_objects/HomePage.js';
 import { ListingsPage } from '../../page_objects/ListingsPage.js';
 import { EstateObjectPage } from '../../page_objects/EstateObjectPage.js';
+import { apiCreateListing } from '../../api/ListingsApi.js';
+import { apiGetLoginToken } from '../../api/UsersApi.js';
 
 test.describe('Home Page Search Feature Positive Tests', () => {
   let homePage, listingsPage, estateObjectPage;
-
+  let listingResponse;
   let resultTitle,
     resultSqftText,
     resultBedroomsText,
@@ -26,17 +27,24 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     objectGarageNum,
     objectBathroomsNum;
 
-  test.beforeEach(async ({ adminAuthenticatedPage }, testInfo) => {
-    homePage = new HomePage(adminAuthenticatedPage);
-    listingsPage = new ListingsPage(adminAuthenticatedPage);
-    estateObjectPage = new EstateObjectPage(adminAuthenticatedPage);
+  test.beforeEach(async ({ page, request }, testInfo) => {
+    homePage = new HomePage(page);
+    listingsPage = new ListingsPage(page);
+    estateObjectPage = new EstateObjectPage(page);
 
-    await adminAuthenticatedPage.goto(testInfo.project.use.env.baseUrl);
+    const accessToken = await apiGetLoginToken(
+      request,
+      testInfo.project.use.env.adminEmail,
+      testInfo.project.use.env.adminPassword
+    );
+    listingResponse = await apiCreateListing(request, accessToken);
+   
+    await page.goto('/');
     await homePage.darkModeSwitch.click();
   });
 
-  test('Should search by keyword', async ({ createdListing }) => {
-    const keyword = createdListing.title;
+  test('Should search by keyword', async () => {
+    const keyword = listingResponse.title;
     const expectedAmount = 1;
 
     await homePage.fillKeywordSearchField(keyword);
@@ -54,17 +62,12 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     );
   });
 
-  test('Should search by bedrooms', async ({
-    adminAuthenticatedPage,
-    createdListing,
-  }) => {
+  test('Should search by bedrooms', async ({ page }) => {
     const searchBedroomsNum = 2;
 
     await homePage.selectMinimumBedroomsSearchOption(searchBedroomsNum);
     await homePage.startSearchButton.click();
-    await adminAuthenticatedPage.waitForURL(
-      `/**bedrooms=${searchBedroomsNum}**`
-    );
+    await page.waitForURL(`/**bedrooms=${searchBedroomsNum}**`);
 
     await expect(
       listingsPage.estateObject.resultBedrooms.first()
@@ -130,19 +133,17 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     expect(objectBathroomsNum).toBe(resultBathroomsNum);
   });
 
-  test('Should search by city', async ({
-    adminAuthenticatedPage,
-    createdListing,
-  }) => {
-    const city = createdListing.city;
-    const cityURL = createdListing.city.replaceAll(' ', '+');
+  test('Should search by city', async ({ page }) => {
+    const city = listingResponse.city;
+    const cityURL = city.replaceAll(' ', '+');
 
     await homePage.fillCitySearchField(city);
     await homePage.startSearchButton.click();
-    await adminAuthenticatedPage.waitForURL(`/**${cityURL}**`);
+    await page.waitForURL(`/**${cityURL}**`);
 
     await expect(listingsPage.estateObject.resultCity.first()).toContainText(
-      city
+      city,
+      { timeout: 6000 }
     );
 
     const resultCityCounter =
@@ -202,7 +203,7 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     expect(objectBathroomsNum).toBe(resultBathroomsNum);
   });
 
-  test('Should search by price', async ({ adminAuthenticatedPage }) => {
+  test('Should search by price', async ({ page }) => {
     let minValue = 200000;
     let maxValue = 1000000;
 
@@ -220,7 +221,7 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     const searchedMinValue = await homePage.getCurrentMinPriceNumber();
     await homePage.startSearchButton.click();
 
-    await adminAuthenticatedPage.waitForURL(
+    await page.waitForURL(
       `/**?price=${searchedMinValue}-${searchedMaxValue}**`
     );
     await expect(listingsPage.estateObject.resultPrice.first()).toBeVisible();
@@ -238,8 +239,8 @@ test.describe('Home Page Search Feature Positive Tests', () => {
     }
   });
 
-  test.afterAll('Teardown', async ({ request, createdListing }) => {
-    const objectId = createdListing.id;
+  test.afterAll('Teardown', async ({ request }) => {
+    const objectId = listingResponse.id;
     await request.delete(`api/estate-objects/${objectId}`);
   });
 });
