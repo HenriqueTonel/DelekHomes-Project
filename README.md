@@ -15,7 +15,7 @@ Delek Homes is a company that builds and sells real estate in Florida. The websi
 
 Delek Homes' mission is to solve the problem of frustation that may arise from non-intuitive search processes by simplifying and streamlining the property searching process. Finding the right home should be a straightforward and enjoyable experience, not a daunting task.
 
-### Automated Testing
+### Automated Scripts
 The files inside this repository contain my work in automated tests from this project. If you have interest in running the tests in your local machine, feel free to send me DM through my socials under "Contact Me" section, to have access to the data in "Secrets"!
 
 ### Test Cases
