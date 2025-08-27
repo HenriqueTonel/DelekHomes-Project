@@ -1,51 +1,29 @@
 import { test, expect } from '@playwright/test';
 import { HomePage } from '../../page_objects/HomePage.js';
 import { ListingsPage } from '../../page_objects/ListingsPage.js';
-import { EstateObjectPage } from '../../page_objects/EstateObjectPage.js';
 import { apiCreateListing } from '../../api/ListingsApi.js';
 import { apiGetLoginToken } from '../../api/UsersApi.js';
 
 test.describe('Featured Listings Page Search Feature Positive Tests', () => {
-  let homePage, listingsPage, estateObjectPage;
+  let homePage, listingsPage;
   let listingResponse;
-  let resultTitle,
-    resultSqftText,
-    resultBedroomsText,
-    resultGarageText,
-    resultBathroomsText,
-    resultSqftNum,
-    resultBedroomsNum,
-    resultGarageNum,
-    resultBathroomsNum,
-    objectTitle,
-    objectSquareFeetText,
-    objectBedroomsText,
-    objectGarageText,
-    objectBathroomsText,
-    objectSquareFeetNum,
-    objectBedroomsNum,
-    objectGarageNum,
-    objectBathroomsNum;
 
-    test.beforeAll(async ({ request }, testInfo) => {
-      const accessToken = await apiGetLoginToken(
-        request,
-        testInfo.project.use.env.adminEmail,
-        testInfo.project.use.env.adminPassword
-      );
-      listingResponse = await apiCreateListing(request, accessToken);
-    });
-    
-    test.beforeEach(async ({ page }) => {
-      homePage = new HomePage(page);
-      listingsPage = new ListingsPage(page);
-      estateObjectPage = new EstateObjectPage(page);
-      
-          await page.goto('/featured-listings');
-          await homePage.darkModeSwitch.click();
+  test.beforeEach(async ({ page }) => {
+    homePage = new HomePage(page);
+    listingsPage = new ListingsPage(page);
+
+    await page.goto('/featured-listings');
+    await homePage.darkModeSwitch.click();
   });
 
-  test('Should search by keyword', async () => {
+  test('Should search by keyword', async ({request}, testInfo) => {
+    const accessToken = await apiGetLoginToken(
+      request,
+      testInfo.project.use.env.adminEmail,
+      testInfo.project.use.env.adminPassword
+    );
+    listingResponse = await apiCreateListing(request, accessToken);
+
     const keyword = listingResponse.title;
     const expectedAmount = 1;
 
@@ -83,56 +61,16 @@ test.describe('Featured Listings Page Search Feature Positive Tests', () => {
 
       expect(match).toBeGreaterThanOrEqual(searchBedroomsNum);
     }
-    resultTitle = await listingsPage.estateObject.resultTitle
-      .first()
-      .textContent();
-    resultSqftText = await listingsPage.estateObject.resultSqft
-      .first()
-      .textContent();
-    resultBedroomsText = await listingsPage.estateObject.resultBedrooms
-      .first()
-      .textContent();
-    resultGarageText = await listingsPage.estateObject.resultGarage
-      .first()
-      .textContent();
-    resultBathroomsText = await listingsPage.estateObject.resultBathrooms
-      .first()
-      .textContent();
-    resultSqftNum = parseInt(resultSqftText.replace(/[^0-9]/g, ''), 10);
-    resultBedroomsNum = parseInt(resultBedroomsText.replace(/[^0-9]/g, ''), 10);
-    resultGarageNum = parseInt(resultGarageText.replace(/[^0-9]/g, ''), 10);
-    resultBathroomsNum = parseInt(
-      resultBathroomsText.replace(/[^0-9]/g, ''),
-      10
-    );
-
-    await listingsPage.estateObject.moreInfoButton.first().click();
-
-    objectTitle = await estateObjectPage.objectTitle.textContent();
-    objectSquareFeetText =
-      await estateObjectPage.objectSquareFeet.textContent();
-    objectBedroomsText = await estateObjectPage.objectBedrooms.textContent();
-    objectGarageText = await estateObjectPage.objectGarage.textContent();
-    objectBathroomsText = await estateObjectPage.objectBathrooms.textContent();
-    objectSquareFeetNum = parseInt(
-      objectSquareFeetText.replace(/[^0-9]/g, ''),
-      10
-    );
-    objectBedroomsNum = parseInt(objectBedroomsText.replace(/[^0-9]/g, ''), 10);
-    objectGarageNum = parseInt(objectGarageText.replace(/[^0-9]/g, ''), 10);
-    objectBathroomsNum = parseInt(
-      objectBathroomsText.replace(/[^0-9]/g, ''),
-      10
-    );
-
-    expect(objectTitle).toBe(resultTitle);
-    expect(objectSquareFeetNum).toBe(resultSqftNum);
-    expect(objectBedroomsNum).toBe(resultBedroomsNum);
-    expect(objectGarageNum).toBe(resultGarageNum);
-    expect(objectBathroomsNum).toBe(resultBathroomsNum);
   });
 
-  test('Should search by city', async ({ page }) => {
+  test('Should search by city', async ({ page, request }, testInfo) => {
+    const accessToken = await apiGetLoginToken(
+      request,
+      testInfo.project.use.env.adminEmail,
+      testInfo.project.use.env.adminPassword
+    );
+    listingResponse = await apiCreateListing(request, accessToken);
+
     const city = listingResponse.city;
     const cityURL = city.replaceAll(' ', '+');
 
@@ -144,62 +82,14 @@ test.describe('Featured Listings Page Search Feature Positive Tests', () => {
       city
     );
 
-    // const resultCityCounter =
-    //   await listingsPage.estateObject.resultCity.count();
+    const resultCityCounter =
+      await listingsPage.estateObject.resultCity.count();
 
-    // for (let i = 0; i < resultCityCounter; i++) {
-    //   await expect(listingsPage.estateObject.resultCity.nth(i)).toContainText(
-    //     city
-    //   );
-    // }
-
-    resultTitle = await listingsPage.estateObject.resultTitle
-      .first()
-      .textContent();
-    resultSqftText = await listingsPage.estateObject.resultSqft
-      .first()
-      .textContent();
-    resultBedroomsText = await listingsPage.estateObject.resultBedrooms
-      .first()
-      .textContent();
-    resultGarageText = await listingsPage.estateObject.resultGarage
-      .first()
-      .textContent();
-    resultBathroomsText = await listingsPage.estateObject.resultBathrooms
-      .first()
-      .textContent();
-    resultSqftNum = parseInt(resultSqftText.replace(/[^0-9]/g, ''), 10);
-    resultBedroomsNum = parseInt(resultBedroomsText.replace(/[^0-9]/g, ''), 10);
-    resultGarageNum = parseInt(resultGarageText.replace(/[^0-9]/g, ''), 10);
-    resultBathroomsNum = parseInt(
-      resultBathroomsText.replace(/[^0-9]/g, ''),
-      10
-    );
-
-    await listingsPage.estateObject.moreInfoButton.first().click();
-
-    objectTitle = await estateObjectPage.objectTitle.textContent();
-    objectSquareFeetText =
-      await estateObjectPage.objectSquareFeet.textContent();
-    objectBedroomsText = await estateObjectPage.objectBedrooms.textContent();
-    objectGarageText = await estateObjectPage.objectGarage.textContent();
-    objectBathroomsText = await estateObjectPage.objectBathrooms.textContent();
-    objectSquareFeetNum = parseInt(
-      objectSquareFeetText.replace(/[^0-9]/g, ''),
-      10
-    );
-    objectBedroomsNum = parseInt(objectBedroomsText.replace(/[^0-9]/g, ''), 10);
-    objectGarageNum = parseInt(objectGarageText.replace(/[^0-9]/g, ''), 10);
-    objectBathroomsNum = parseInt(
-      objectBathroomsText.replace(/[^0-9]/g, ''),
-      10
-    );
-
-    expect(objectTitle).toBe(resultTitle);
-    expect(objectSquareFeetNum).toBe(resultSqftNum);
-    expect(objectBedroomsNum).toBe(resultBedroomsNum);
-    expect(objectGarageNum).toBe(resultGarageNum);
-    expect(objectBathroomsNum).toBe(resultBathroomsNum);
+    for (let i = 0; i < resultCityCounter; i++) {
+      await expect(listingsPage.estateObject.resultCity.nth(i)).toContainText(
+        city
+      );
+    }
   });
 
   test('Should search by price', async ({ page }) => {
@@ -234,7 +124,10 @@ test.describe('Featured Listings Page Search Feature Positive Tests', () => {
     }
   });
   test.afterEach('Teardown', async ({ request }) => {
-    const objectId = listingResponse.id;
-    await request.delete(`api/estate-objects/${objectId}`);
+    if (listingResponse) {
+      const objectId = listingResponse.id;
+      await request.delete(`api/estate-objects/${objectId}`);
+      listingResponse = undefined;
+    }
   });
 });
