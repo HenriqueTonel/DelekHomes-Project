@@ -1,0 +1,45 @@
+{
+    "count": 1,
+    "list": [
+        {
+            "id": 21545,
+            "title": "Henrique's cozy house",
+            "description": "Test House123@ ",
+            "address": "4527 w 142nd st",
+            "city": "Test City 123",
+            "state": "CA",
+            "zipCode": "91942",
+            "price": 500000,
+            "bedrooms": 2,
+            "bathrooms": 3,
+            "garage": 0,
+            "sqft": 2060,
+            "lotSize": 200,
+            "createdAt": "2025-07-23T14:05:54.077Z",
+            "updatedAt": "2025-07-23T14:05:59.179Z",
+            "images": [
+                "/static/media/4.7b41bdc0126a7e58e56e.jpeg"
+            ],
+            "isPublished": true,
+            "realtor": {
+                "id": 20838,
+                "username": "Henrique",
+                "user_surname": "Tonel",
+                "email": "henriquerealtor@gmail.com",
+                "bio": "",
+                "avatarUrl": "content/images/Capturadetela2024-11-19164502adafa65f-c921-42f3-8b49-69f6e813ae32.png",
+                "phoneNumber": null,
+                "address": null,
+                "country": null,
+                "stateOrRegion": null,
+                "city": null,
+                "zipCode": null,
+                "about": null,
+                "isPublic": false,
+                "isRealtor": true,
+                "password": "$argon2id$v=19$m=4096,t=3,p=1$+xplTMX0lLU/WSUpmp0XvQ$0BOLOX1YEnGR0hkMGZtCIsBLkQ6ROWLyUw1me1ebevc"
+            },
+            "favorite": []
+        }
+    ]
+}
